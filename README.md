@@ -48,3 +48,6 @@ cd /Users/mazzitel/dodas-docker-images/docker/CYGNO
 docker build -t gmazzitelli/cygno-lab:v1.0.17-cygno -f lab/Dockerfile .
 docker push gmazzitelli/cygno-lab:v1.0.17-cygno
 ```
+```
+docker login -u gmazzitelli
+```
