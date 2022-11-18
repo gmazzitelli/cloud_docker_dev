@@ -3,19 +3,26 @@
 FROM dodasts/cygno-lab:v1.0.16-cygno
 
 # Testetd updadete implemented in v1.0.16-cygno
-# RUN pip3 install 'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
-# RUN pip3 install tensorflow
-# RUN pip3 install keras
-# RUN pip3 install opencv-python
+RUN pip3 install 'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
+RUN pip3 install tensorflow
+RUN pip3 install keras
+RUN pip3 install opencv-python
 
 # just alwas run last update on CYGNO LIB
 RUN pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git 
 
-RUN pip3 install root_numpy 
-    
+RUN pip3 install root_numpy
+
+RUN pip3 install pydot
+
+RUN pip3 install graphviz
+
+RUN pip3 install uproot
+
+# Eamnule "pippone" last requirments....
+RUN ln -sf /bin/python2 /bin/python
 RUN yum install emacs -y 
 RUN yum install screen -y
-
 RUN wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz; \
     tar xvf Python-3.9.10.tgz; \
     cd Python-3.9*/; \
@@ -23,5 +30,4 @@ RUN wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz; \
     make altinstall; \
     cd .. ; \
     rm -rf Python-3.9*
-
 
