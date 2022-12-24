@@ -1,0 +1,66 @@
+FROM htcondor/execute:8.9.9-el7
+
+COPY assets/base_packages /tmp/
+COPY assets/packages /tmp/
+
+# clean metadata: https://srvfail.com/yum-doesnt-work-in-clean-centos-7-install-exiting-on-user-cancel/
+RUN yum -y clean metadata \
+    && yum --exclude=\*oidc-agent\* -y update \
+    && yum --exclude=\*oidc-agent\* -y upgrade \
+    && xargs yum -y install < /tmp/base_packages \
+    && xargs yum -y install < /tmp/packages \
+    && yum -y clean all \
+    && rm -f /tmp/*packages
+
+# FROM debian:buster
+# MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
+
+ARG SRIM_DIR="/tmp"
+
+# RUN dpkg --add-architecture i386
+
+RUN yum -y update && yum -y install \
+    wget \
+    unzip \
+    xorg-x11-server-Xvfb \
+    https://harbottle.gitlab.io/wine32/7/i386/wine32-release.rpm \
+    wine.i686 \
+    cabextract 
+
+#RUN yum update && \
+#    yum install -y wget unzip xvfb wine32 cabextract && \
+#    rm -rf /var/lib/apt/lists/*
+
+# winetricks
+RUN cd /opt && \
+    wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod +x winetricks && \
+    cp winetricks /usr/local/bin
+
+# https://appdb.winehq.org/objectManager.php?sClass=version&iId=27152
+RUN xvfb-run winetricks -q comdlg32ocx msflxgrd richtx32 vb5run comctl32ocx tabctl32
+
+RUN mkdir -p $SRIM_DIR && \
+    cd $SRIM_DIR && \
+    wget -q https://gitlab.com/costrouc/pysrim/raw/master/assets/srim.2013.zip && \
+    unzip srim.2013.zip && \
+    cd "$SRIM_DIR/srim" && \
+    echo "1" > $SRIM_DIR/srim/TRIMAUTO
+
+COPY examples/input/TRIM.Ni.IN $SRIM_DIR/srim/TRIM.IN
+
+WORKDIR "$SRIM_DIR/srim"
+CMD ["xvfb-run", "-a", "wine", "TRIM.exe"]
+
+# Modify $SRIM_DIR/srim/TRIM.IN for input file
+# Outputfiles in $SRIM_DIR/srim/
+
+ARG VERSION=v0.4.0
+ARG USERNAME=costrouc
+ARG PROJECT=pysrim
+
+RUN yum update && \
+    yum install -y python3.6 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir https://gitlab.com/$USERNAME/$PROJECT/repository/$VERSION/archive.tar.gz
