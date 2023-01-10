@@ -1,11 +1,5 @@
-#
-# FROM debian:buster
-# MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
-# https://gitlab.com/costrouc/pysrim/-/tree/master/
-# docker build -t gmazzitelli/cygno-wn:v1.0.1-pysrim-cygno -f Dockerfile.srim.comdor .
-#
-FROM htcondor/execute:8.9.11-ubu18.04
-MAINTAINER Gioanni Mazzitelli <giovanni.mazzitelli@lnf.infn.it>
+FROM debian:buster
+MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
 
 ARG SRIM_DIR="/tmp"
 
@@ -34,19 +28,7 @@ RUN mkdir -p $SRIM_DIR && \
 COPY examples/input/TRIM.Ni.IN $SRIM_DIR/srim/TRIM.IN
 
 WORKDIR "$SRIM_DIR/srim"
-# commentato perche' non so a cosa serva
-# CMD ["xvfb-run", "-a", "wine", "TRIM.exe"]
+CMD ["xvfb-run", "-a", "wine", "TRIM.exe"]
 
 # Modify $SRIM_DIR/srim/TRIM.IN for input file
 # Outputfiles in $SRIM_DIR/srim/
-
-RUN apt update && \
-    apt install python3.6 python3-pip -y && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install PyYAML==3.13 \
-		numpy==1.15.4 \
-		pysrim==0.5.10
-
-RUN chmod -R a+w /usr/local/lib/python3.6/dist-packages/srim
-
