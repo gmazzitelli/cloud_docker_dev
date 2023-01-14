@@ -1,0 +1,64 @@
+#
+# FROM debian:buster
+# MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
+# https://gitlab.com/costrouc/pysrim/-/tree/master/
+# docker build -t gmazzitelli/cygno-wn:v1.0.1-pysrim-cygno -f Dockerfile.srim.comdor .
+#
+FROM htcondor/execute:8.9.11-ubu18.04
+MAINTAINER Gioanni Mazzitelli <giovanni.mazzitelli@lnf.infn.it>
+
+ARG SRIM_DIR="/usr/local"
+
+RUN dpkg --add-architecture i386
+
+RUN apt update && \
+#    apt install -y x11-apps && \
+    apt install wget unzip xvfb wine32 cabextract -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# winetricks
+RUN cd /opt && \
+    wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod +x winetricks && \
+    cp winetricks /usr/local/bin
+
+#RUN chmod -R a+rwx /root
+
+#USER nobody:nogroup
+
+# winetricks
+RUN cd /opt && \
+    wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod +x winetricks && \
+    cp winetricks /usr/local/bin
+
+# https://appdb.winehq.org/objectManager.php?sClass=version&iId=27152
+RUN xvfb-run winetricks -q comdlg32ocx msflxgrd richtx32 vb5run comctl32ocx tabctl32
+
+RUN mkdir -p $SRIM_DIR && \
+    cd $SRIM_DIR && \
+    wget -q https://gitlab.com/costrouc/pysrim/raw/master/assets/srim.2013.zip && \
+    unzip srim.2013.zip && \
+    cd "$SRIM_DIR/srim" && \
+    echo "1" > $SRIM_DIR/srim/TRIMAUTO
+
+RUN apt update && \
+    apt install python3.6 python3-pip -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install PyYAML==3.13 \
+                numpy==1.15.4 \
+                pysrim==0.5.10
+
+RUN chmod -R a+w /usr/local/srim
+
+COPY ./output.py /usr/local/lib/python3.6/dist-packages/srim/output.py
+COPY ./srim.py /usr/local/lib/python3.6/dist-packages/srim/srim.py
+COPY ./TRIM.Ni.IN $SRIM_DIR/srim/TRIM.IN
+COPY ./pysrim_test.py $SRIM_DIR/srim/pysrim_test.py
+
+RUN chmod -R a+rw $SRIM_DIR/srim/TRIM.IN
+RUN chmod -R a+rwx /root
+
+WORKDIR "$SRIM_DIR/srim"
+

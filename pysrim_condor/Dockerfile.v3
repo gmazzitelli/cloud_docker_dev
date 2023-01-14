@@ -1,0 +1,102 @@
+#
+# FROM debian:buster
+# MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
+# https://gitlab.com/costrouc/pysrim/-/tree/master/
+# docker build -t gmazzitelli/cygno-wn:v1.0.1-pysrim-cygno -f Dockerfile.srim.comdor .
+#
+ARG BASE_IMAGE="htcondor/execute"
+ARG TAG="8.9.11-ubu18.04"
+FROM ${BASE_IMAGE}:${TAG}
+
+# FROM htcondor/execute:8.9.11-ubu18.04
+MAINTAINER Gioanni Mazzitelli <giovanni.mazzitelli@lnf.infn.it>
+
+ARG SRIM_DIR="/usr/local"
+
+RUN dpkg --add-architecture i386
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
+    && apt-get -y upgrade \
+    && apt-get -y install wget unzip xvfb cabextract -y \
+    && rm -rf /var/lib/apt/lists/*
+
+
+#RUN apt-get update \
+#    && apt-get -y upgrade \
+#    && apt-get -y install wget unzip xvfb cabextract -y
+
+##############
+# Wine setup #
+##############
+
+# Install wine
+ARG WINE_BRANCH="stable"
+RUN wget -nv -O- https://dl.winehq.org/wine-builds/winehq.key | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
+    && echo "deb https://dl.winehq.org/wine-builds/ubuntu/ $(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) main" >> /etc/apt/sources.list \
+    && dpkg --add-architecture i386 \
+    && apt-get update \
+    && DEBIAN_FRONTEND="noninteractive" apt-get install -y --install-recommends winehq-${WINE_BRANCH} \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install winetricks
+RUN wget -nv -O /usr/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
+    && chmod +x /usr/bin/winetricks
+
+
+## Enable 32 bit architecture for 64 bit systems
+#RUN dpkg --add-architecture i386
+
+## Add wine repository (https://github.com/PedrioliLab/docker-wine/blob/master/Dockerfile)
+#RUN wget -nc https://dl.winehq.org/wine-builds/winehq.key
+#RUN apt-key add winehq.key
+#RUN wget -qO- https://dl.winehq.org/wine-builds/Release.key | apt-key add -
+#RUN apt-get -y install software-properties-common \
+#    && add-apt-repository 'deb http://dl.winehq.org/wine-builds/ubuntu/ bionic main' \
+#    && apt-get update
+
+## Install wine and winetricks
+#RUN apt-get -y install --install-recommends winehq-devel cabextract
+
+
+# winetricks
+#RUN cd /opt && \
+#    wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+#    chmod +x winetricks && \
+#    cp winetricks /usr/local/bin
+
+# https://appdb.winehq.org/objectManager.php?sClass=version&iId=27152
+# RUN xvfb-run winetricks -q comdlg32ocx msflxgrd richtx32 vb5run comctl32ocx tabctl32
+
+##############
+# SRIM setup #
+##############
+
+RUN mkdir -p $SRIM_DIR && \
+    cd $SRIM_DIR && \
+    wget -q https://gitlab.com/costrouc/pysrim/raw/master/assets/srim.2013.zip && \
+    unzip srim.2013.zip && \
+    cd "$SRIM_DIR/srim" && \
+    echo "1" > $SRIM_DIR/srim/TRIMAUTO
+
+################
+# pysrim setup #
+################
+
+RUN apt update && \
+    apt install python3.6 python3-pip -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install PyYAML==3.13 \
+                numpy==1.15.4 \
+                pysrim==0.5.10
+
+RUN chmod -R a+w /usr/local/srim
+
+COPY ./output.py /usr/local/lib/python3.6/dist-packages/srim/output.py
+COPY ./srim.py /usr/local/lib/python3.6/dist-packages/srim/srim.py
+COPY ./TRIM.Ni.IN $SRIM_DIR/srim/TRIM.IN
+COPY ./pysrim_test.py $SRIM_DIR/srim/pysrim_test.py
+
+WORKDIR "$SRIM_DIR/srim"
+
