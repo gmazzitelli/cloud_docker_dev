@@ -16,7 +16,7 @@ cd /usr/local/share/dodasts/jupyterhub/
 sudo vi docker-compose.yaml (aggiornare il docker))
 sudo docker pull gmazzitelli/cygno-lab:v1.0.14-cygno
 ```
-**WARNING: ** per le macchien create cin Docker --> /opt/NOMEAPPLICAZIONE
+**WARNING: ** per le macchiene create in Docker dashabord --> /opt/NOMEAPPLICAZIONE
 * test https://192.135.24.159:8888/
 * per mettere piu' versioni aggiornare la variabile come nell'esempio in usr/local/share/dodasts/jupyterhub/docker-compose.yaml: 
 ```
