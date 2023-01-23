@@ -12,19 +12,8 @@ ARG SRIM_DIR="/usr/local"
 RUN dpkg --add-architecture i386
 
 RUN apt update && \
-#    apt install -y x11-apps && \
     apt install wget unzip xvfb wine32 cabextract -y && \
     rm -rf /var/lib/apt/lists/*
-
-# winetricks
-RUN cd /opt && \
-    wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
-    chmod +x winetricks && \
-    cp winetricks /usr/local/bin
-
-#RUN chmod -R a+rwx /root
-
-#USER nobody:nogroup
 
 # winetricks
 RUN cd /opt && \
@@ -35,12 +24,14 @@ RUN cd /opt && \
 # https://appdb.winehq.org/objectManager.php?sClass=version&iId=27152
 RUN xvfb-run winetricks -q comdlg32ocx msflxgrd richtx32 vb5run comctl32ocx tabctl32
 
+
 RUN mkdir -p $SRIM_DIR && \
     cd $SRIM_DIR && \
     wget -q https://gitlab.com/costrouc/pysrim/raw/master/assets/srim.2013.zip && \
     unzip srim.2013.zip && \
     cd "$SRIM_DIR/srim" && \
     echo "1" > $SRIM_DIR/srim/TRIMAUTO
+
 
 RUN apt update && \
     apt install python3.6 python3-pip -y && \
@@ -58,7 +49,23 @@ COPY ./TRIM.Ni.IN $SRIM_DIR/srim/TRIM.IN
 COPY ./pysrim_test.py $SRIM_DIR/srim/pysrim_test.py
 
 RUN chmod -R a+rw $SRIM_DIR/srim/TRIM.IN
-RUN chmod -R a+rwx /root
 
+ARG USER=condor
+# 
+RUN chsh -s /bin/bash $USER
+#
+ARG PREFIX=/var/lib/condor
+COPY ./post_instal.sh ${PREFIX}/
+RUN chown condor $PREFIX
+RUN chown condor:condor ${PREFIX}/post_instal.sh
+RUN chmod +x ${PREFIX}/post_instal.sh
+USER $USER
+
+ENV WINEARCH=''win32''
+ENV WINEPREFIX=${PREFIX}/.wine
+
+RUN ${PREFIX}/post_instal.sh
+
+USER root
 WORKDIR "$SRIM_DIR/srim"
 
