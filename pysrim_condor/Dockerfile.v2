@@ -1,8 +1,7 @@
 #
-# FROM debian:buster
-# MAINTAINER Chris Ostrouchov <chris.ostrouchov@gmail.com>
+# Original from:
 # https://gitlab.com/costrouc/pysrim/-/tree/master/
-# docker build -t gmazzitelli/cygno-wn:v1.0.1-pysrim-cygno -f Dockerfile.srim.comdor .
+# docker build -t gmazzitelli/cygno-wn:v1.0.2-pysrim-cygno -f Dockerfile.v2 .
 #
 FROM htcondor/execute:8.9.11-ubu18.04
 MAINTAINER Gioanni Mazzitelli <giovanni.mazzitelli@lnf.infn.it>
@@ -53,7 +52,7 @@ RUN chmod -R a+rw $SRIM_DIR/srim/TRIM.IN
 ARG USER=condor
 # 
 RUN chsh -s /bin/bash $USER
-#
+
 ARG PREFIX=/var/lib/condor
 COPY ./post_instal.sh ${PREFIX}/
 RUN chown condor $PREFIX
