@@ -1,0 +1,8 @@
+# FROM dodasts/cygno-lab:<latest release> -> for example:
+# FROM dodasts/cygno-lab:v1.0.16-cygno
+FROM dodasts/snj-base-lab-cc7:v1.1.1-snj
+
+RUN yum remove -y oidc-agent oidc-agent-cli oidc-agent-desktop liboidc-agent4
+
+ADD $PWD/rpm/  /rpm/
+RUN rpm -i /rpm/* 

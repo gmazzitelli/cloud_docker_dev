@@ -1,0 +1,22 @@
+FROM ubuntu:20.04
+
+#FROM htcondor/execute:8.9.11-ubu18.04
+
+ENV TZ=Europe
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /tmp 
+RUN apt-get update && apt-get install -y wget gnupg
+RUN wget -qO - https://research.cs.wisc.edu/htcondor/ubuntu/HTCondor-Release.gpg.key | apt-key add -
+RUN echo "deb http://research.cs.wisc.edu/htcondor/ubuntu/8.9/focal focal contrib" >> /etc/apt/sources.list
+RUN echo "deb-src http://research.cs.wisc.edu/htcondor/ubuntu/8.9/focal focal contrib" >> /etc/apt/sources.list
+RUN apt-get update && apt-get install -y condor
+
+RUN apt-get update && apt-get install -y curl apt-transport-https ca-certificates software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io
+
+#CMD ["/bin/bash", "-c", "service docker start && condor_master"]
+

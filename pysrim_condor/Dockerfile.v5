@@ -1,0 +1,28 @@
+FROM htcondor/execute:8.9.9-el7
+
+# Install Docker CE
+RUN yum install -y yum-utils \
+    && yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo \
+    && yum install -y docker-ce docker-ce-cli
+
+RUN usermod -aG docker condor
+# Pysrim post installation
+RUN mkdir /pysrim
+RUN chmod a+xrw /pysrim
+WORKDIR /pysrim 
+COPY output.py  /pysrim/
+COPY pysrim_test.py  /pysrim/
+COPY srim.py /pysrim/
+# Start the Docker daemon
+#RUN systemctl enable docker
+#RUN groupadd docker
+#RUN mkdir /tmpfs
+#RUN chmod a+xrw /tmpfs
+#ENV HOME=/tmpfs
+#ENV XDG_RUNTIME_DIR=/tmpfs
+#ENTRYPOINT ["/usr/bin/dockerd-rootless.sh"]
+#COPY startup.sh startup.sh
+#RUN chmod +x startup.sh
+#RUN echo "exec /usr/bin/dockerd -G condor " >> start.sh
+#CMD startup.sh
+#ENTRYPOINT ["/usr/bin/dockerd -G condor &"]
