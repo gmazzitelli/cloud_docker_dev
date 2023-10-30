@@ -1,15 +1,4 @@
-# FROM dodasts/cygno-lab:<latest release> -> for example:
-# FROM dodasts/cygno-lab:v1.0.16-cygno
-FROM gmazzitelli/cygno-lab:v1.0.17-cygno
+FROM gmazzitelli/cygno-wn:v1.0.20-cygno
+RUN pip3 install --no-cache-dir \
+    diplib==3.3.0
 
-#RUN yum-config-manager \
-#    --add-repo \
-#    https://download.docker.com/linux/centos/docker-ce.repo
-
-#RUN yum -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-#RUN usermod -aG /usr/bin/dockerd root
-#RUN /usr/bin/dockerd
-RUN yum install -y yum-utils && \
-    yum-config-manager     --add-repo     https://download.docker.com/linux/centos/docker-ce.repo && \
-    yum install -y docker-ce docker-ce-cli
-#RUN chmod 777 /var/run/docker.sock
