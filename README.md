@@ -1,5 +1,8 @@
-Custum test Docker for CYGNO
+###Update
+use buildr.sh setting start tag and outtag
 
+
+###Custum test Docker for CYGNO
 
 * info: https://confluence.infn.it/pages/viewpage.action?spaceKey=INFNCLOUD&title=Estenzione+e+Customizzazione+immagini+docker+CYGNO
 * docker build -t mydockerhubuser/mycustomimage:myversion /docker/path (non Dockerfile ma il path alla directory)
