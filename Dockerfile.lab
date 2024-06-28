@@ -1,0 +1,6 @@
+ARG TAG
+#FROM gmazzitelli/${TAG}
+FROM harbor.cloud.infn.it/datacloud-templates/cygno-lab:cygno-minio-rgw
+RUN pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
